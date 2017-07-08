@@ -15,5 +15,22 @@ namespace IoTAlex.Core.API
         {
             return "Dies ist die Umbraco Instanz von Byte5";
         }
+
+        [HttpGet]
+        public string GetPossibleRootNodes()
+        {
+            var contentTypeService = Services.ContentTypeService;
+            var possibleRootTypes = contentTypeService.GetAllContentTypes().Where(x => x.AllowedAsRoot);
+
+            var possibleTypes = "";
+            foreach (var type in possibleRootTypes)
+            {
+                possibleTypes += type.Name + ",";
+            }
+            possibleTypes.TrimEnd(',');
+
+            return "mögliche Typen: "+possibleTypes;
+        }
+        
     }
 }
