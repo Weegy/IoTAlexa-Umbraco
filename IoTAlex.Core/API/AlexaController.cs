@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Umbraco.Core.Models;
 
 namespace IoTAlex.Core.API
 {
@@ -20,17 +21,34 @@ namespace IoTAlex.Core.API
         public string GetPossibleRootNodes()
         {
             var contentTypeService = Services.ContentTypeService;
-            var possibleRootTypes = contentTypeService.GetAllContentTypes().Where(x => x.AllowedAsRoot);
+            var allowedRootTypes = contentTypeService.GetAllContentTypes().Where(x => x.AllowedAsRoot).OrderBy(x=>x.Id).ToList();
 
             var possibleTypes = "";
-            foreach (var type in possibleRootTypes)
+            for (int i = 0; i < allowedRootTypes.Count; i++)
             {
-                possibleTypes += type.Name + ",";
+                possibleTypes += (i+1)+" "+ allowedRootTypes[i].Alias;
             }
-            possibleTypes.TrimEnd(',');
 
-            return "mögliche Typen: "+possibleTypes;
+            return "mögliche Typen: " + possibleTypes;
         }
+
+        [HttpGet]
+        public string CreateRootNode(int index)
+        {
+            var contentTypeService = Services.ContentTypeService;
+            var contentService = Services.ContentService;
+
+            var allowedRootTypes = contentTypeService.GetAllContentTypes().Where(x => x.AllowedAsRoot).OrderBy(x => x.Id).ToList();
+            var rootType = allowedRootTypes[index];
+
+            var newRootNode = contentService.CreateContent("New Node", -1, rootType.Alias);
+
+            return "Der Knoten wurde erfolgreich angelegt";
+
+        }
+
         
+
+
     }
 }
