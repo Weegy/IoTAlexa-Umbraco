@@ -13,7 +13,7 @@ namespace IoTAlex.Core.API
         [HttpGet]
         public string GetActualUmbracoVersion()
         {
-            return "Hyho this Weegys Umbraco Instance";
+            return "Dies ist die Umbraco Instanz von Byte5";
         }
     }
 }

@@ -18,6 +18,8 @@ namespace IoTAlex.Lambdafunction
     using Alexa.NET.Request.Type;
     using Alexa.NET.Response;
 
+    using Newtonsoft.Json.Linq;
+
     public class Function
     {
         
@@ -41,7 +43,8 @@ namespace IoTAlex.Lambdafunction
             }
 
             var speech = new Alexa.NET.Response.PlainTextOutputSpeech();
-            speech.Text = GetUmbracoString().Result;
+            var informations = GetUmbracoString().Result.Replace("\"","");
+            speech.Text = informations;
 
             // create the response
             var responseBody = new Alexa.NET.Response.ResponseBody();
@@ -63,10 +66,9 @@ namespace IoTAlex.Lambdafunction
                 new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
             client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
 
-            var stringTask = client.GetStringAsync("https://api.github.com/orgs/dotnet/repos");
-
-            var msg = await stringTask;
-            return msg;
+            Task<string> stringTask = client.GetStringAsync("http://iotalexaweb20170708022524.azurewebsites.net/umbraco/api/alexa/GetActualUmbracoVersion");
+            var responseText = await stringTask;
+            return responseText;
         }
     }
 }
