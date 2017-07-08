@@ -31,7 +31,58 @@ namespace IoTAlex.Lambdafunction
 
             if (requestType == typeof(IntentRequest))
             {
-                // do some intent-based stuff
+                var intentRequest = input.Request as IntentRequest;
+                var responseBodyIntent = new Alexa.NET.Response.ResponseBody();
+                var speechIntent = new Alexa.NET.Response.PlainTextOutputSpeech();
+                var skillResponseIntent = new Alexa.NET.Response.SkillResponse();
+                // check the name to determine what you should do
+                if (intentRequest.Intent.Name.Equals("umbracoRootknoten"))
+                {
+                   
+                    var informationsIntent = GetUmbracoRootNode().Result.Replace("\"", "");
+                    speechIntent.Text = informationsIntent;
+
+                    // create the response
+                   
+                    responseBodyIntent.OutputSpeech = speechIntent;
+                    responseBodyIntent.ShouldEndSession = true; // this triggers the reprompt
+                   
+                    skillResponseIntent.Response = responseBodyIntent;
+                    skillResponseIntent.Version = "1.0";
+
+                    return skillResponseIntent;
+                }
+
+                if (intentRequest.Intent.Name.Equals("erstelleUmbracoRootknoten"))
+                {
+                    var number = intentRequest.Intent.Slots["rootknotenalias"].Value;
+
+                    if (number != null)
+                    {
+                        var informationsIntent = CreateNode(number).Result.Replace("\"", "");
+                        speechIntent.Text = informationsIntent;
+
+
+                        responseBodyIntent.OutputSpeech = speechIntent;
+                        responseBodyIntent.ShouldEndSession = true; // this triggers the reprompt
+
+                        skillResponseIntent.Response = responseBodyIntent;
+                        skillResponseIntent.Version = "1.0";
+
+                        return skillResponseIntent;
+                    }
+                    speechIntent.Text = "Ungültig Eingabe Sie Vollidiot!";
+
+
+                    responseBodyIntent.OutputSpeech = speechIntent;
+                    responseBodyIntent.ShouldEndSession = true; // this triggers the reprompt
+
+                    skillResponseIntent.Response = responseBodyIntent;
+                    skillResponseIntent.Version = "1.0";
+
+                    return skillResponseIntent;
+
+                }
             }
             else if (requestType == typeof(Alexa.NET.Request.Type.LaunchRequest))
             {
@@ -43,7 +94,7 @@ namespace IoTAlex.Lambdafunction
             }
 
             var speech = new Alexa.NET.Response.PlainTextOutputSpeech();
-            var informations = GetUmbracoString().Result.Replace("\"","");
+            var informations = GetUmbracoString().Result.Replace("\"", "");
             speech.Text = informations;
 
             // create the response
@@ -56,7 +107,7 @@ namespace IoTAlex.Lambdafunction
             skillResponse.Version = "1.0";
 
             return skillResponse;
-        }
+    }
 
         private async Task<string> GetUmbracoString()
         {
@@ -67,6 +118,32 @@ namespace IoTAlex.Lambdafunction
             client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
 
             Task<string> stringTask = client.GetStringAsync("http://iotalexaweb20170708022524.azurewebsites.net/umbraco/api/alexa/GetActualUmbracoVersion");
+            var responseText = await stringTask;
+            return responseText;
+        }
+
+        private async Task<string> CreateNode(string nodeIndex)
+        {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+            client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
+
+            Task<string> stringTask = client.GetStringAsync("http://iotalexaweb20170708022524.azurewebsites.net/umbraco/api/alexa/CreateRootNode?index=" + nodeIndex);
+            var responseText = await stringTask;
+            return responseText;
+        }
+
+        private async Task<string> GetUmbracoRootNode()
+        {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+            client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
+
+            Task<string> stringTask = client.GetStringAsync("http://iotalexaweb20170708022524.azurewebsites.net/umbraco/api/alexa/GetPossibleRootNodes");
             var responseText = await stringTask;
             return responseText;
         }

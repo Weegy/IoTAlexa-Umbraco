@@ -39,16 +39,13 @@ namespace IoTAlex.Core.API
             var contentService = Services.ContentService;
 
             var allowedRootTypes = contentTypeService.GetAllContentTypes().Where(x => x.AllowedAsRoot).OrderBy(x => x.Id).ToList();
-            var rootType = allowedRootTypes[index];
+            var rootType = allowedRootTypes[index-1];
 
             var newRootNode = contentService.CreateContent("New Node", -1, rootType.Alias);
-
+            contentService.Save(newRootNode);
             return "Der Knoten wurde erfolgreich angelegt";
 
         }
-
-        
-
 
     }
 }
